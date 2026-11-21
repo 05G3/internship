@@ -1,170 +1,202 @@
-# ☕ Brew & Co. — Full-Stack Coffee Shop Web Application
-### JPMorganChase (JPMC) Software Services Internship (SSI) Challenge
+# ☕ The Coffee Haven — Full-Stack Coffee Shop Web Application
+### *BREW • BITE • RELAX*
 
-A production-grade, multi-module full-stack application developed during the four-week **SSI Challenge** component of the eight-week JPMorganChase internship. Built with a **Java 21 / Spring Boot 3** backend, **Spring Data JPA**, an embedded **SQLite relational database**, and a **React 18** frontend styled with **Sass**.
+A modern, production-grade full-stack coffee shop web application designed and built with a **Java 17 / Spring Boot 3** backend, **Spring Data JPA**, an embedded **SQLite relational database**, and a **React 18** frontend styled with **Sass (SCSS)**.
 
 ---
 
 ## 📋 Table of Contents
-1. [Project Overview](#project-overview)
-2. [Architecture & Layered Design](#architecture--layered-design)
-3. [Technology Stack](#technology-stack)
-4. [Key Features & Implemented Modules](#key-features--implemented-modules)
-   - [A. Customer-Facing Coffee & Pastry Selection](#a-customer-facing-coffee--pastry-selection)
-   - [B. Interactive Admin Console](#b-interactive-admin-console)
-   - [C. Core Retrieval Features (Specific Intern Contributions)](#c-core-retrieval-features-specific-intern-contributions)
-5. [Database & Persistence Model](#database--persistence-model)
-6. [API Endpoints Reference](#api-endpoints-reference)
-7. [Testing & Quality Verification](#testing--quality-verification)
-8. [Getting Started & Running the Application](#getting-started--running-the-application)
-9. [Four-Week Development Journey](#four-week-development-journey)
+1. [Brand Overview & Visual Identity](#-brand-overview--visual-identity)
+2. [Key Features & System Architecture](#-key-features--system-architecture)
+   - [A. Home Page](#a-home-page)
+   - [B. Authentication & Role-Based Access](#b-authentication--role-based-access)
+   - [C. Customer Dashboard & Ordering](#c-customer-dashboard--ordering)
+   - [D. Admin Dashboard & Operations](#d-admin-dashboard--operations)
+   - [E. Common Global Footer](#e-common-global-footer)
+3. [Default Credentials](#-default-credentials)
+4. [Technology Stack](#-technology-stack)
+5. [Database & Persistence Model](#-database--persistence-model)
+6. [API Endpoints Reference](#-api-endpoints-reference)
+7. [Testing & Quality Verification](#-testing--quality-verification)
+8. [Getting Started & Running the Application](#-getting-started--running-the-application)
 
 ---
 
-## 1. Project Overview
-- **Project**: Full-Stack Coffee Shop Application
-- **Duration**: Four weeks (Part of 8-week JPMorganChase Internship)
-- **Project Structure**: Multi-module Maven application (`backend` and `frontend`)
-- **Application Type**: Client-Server Full-Stack Web Application
+## 🎨 Brand Overview & Visual Identity
 
-The application automates coffee shop operations by unifying customer coffee/pastry ordering, location-aware inventory retrieval, and an administrative console managing users, live catalog updates, multi-branch availability (Downtown, Airport, Campus), and real-time order lifecycle tracking.
+**The Coffee Haven** is an artisanal coffee sanctuary where high-altitude mountain Arabica beans meet serene aesthetics.
 
----
-
-## 2. Architecture & Layered Design
-
-The system implements strict separation of concerns across a layered architecture:
-
-```
-+-------------------------------------------------------------------------+
-|                       React 18 Frontend (Vite)                          |
-|  - Coffee/Pastry Menu   - Location Selector   - Shopping Cart           |
-|  - Admin Console        - Live REST API Explorer (Swagger / Actuator)   |
-+-------------------------------------------------------------------------+
-                                    |
-                         HTTP / JSON REST APIs
-                                    v
-+-------------------------------------------------------------------------+
-|                  Controller Layer (Spring Boot Web)                     |
-|  - PastryController     - ProductController    - UserController         |
-|  - OrderController      - AvailabilityController                        |
-|  - GlobalExceptionHandler (@RestControllerAdvice)                        |
-+-------------------------------------------------------------------------+
-                                    |
-                              DTOs & Calls
-                                    v
-+-------------------------------------------------------------------------+
-|                     Service Layer (Business Logic)                      |
-|  - PastryService        - ProductService       - UserService            |
-|  - OrderService         - AvailabilityService                           |
-+-------------------------------------------------------------------------+
-                                    |
-                           JPA Repository Calls
-                                    v
-+-------------------------------------------------------------------------+
-|                 Repository Layer (Spring Data JPA)                      |
-|  - ProductRepository    - UserRepository                                |
-|  - OrderRepository      - ProductAvailabilityRepository                 |
-+-------------------------------------------------------------------------+
-                                    |
-                              JDBC Queries
-                                    v
-+-------------------------------------------------------------------------+
-|                     SQLite Relational Database                          |
-|  - products             - users                - orders                 |
-|  - order_items          - product_availability                          |
-+-------------------------------------------------------------------------+
-```
-
-### Layer Responsibilities
-1. **Presentation Layer (React 18 + Sass)**: Renders responsive user interfaces, handles client state (cart, location, category filters), and communicates asynchronously with backend endpoints.
-2. **Controller Layer (Spring Boot Web)**: Exposes RESTful endpoints, handles parameter validation (`@Valid`), manages HTTP status codes (`200 OK`, `201 CREATED`, `400 BAD REQUEST`, `404 NOT FOUND`), and maps domain exceptions via `@RestControllerAdvice`.
-3. **Service Layer**: Implements core business logic, coordinates transactions, validates business rules, and isolates repositories from controllers.
-4. **Repository Layer (Spring Data JPA)**: Provides clean abstraction over relational data access with custom derived queries (`findByCategoryIgnoreCaseAndNutFreeTrue`).
-5. **Database Layer (SQLite)**: Provides persistent, relational ACID storage initialized via `schema.sql` and `data.sql`.
+- **Brand Name**: **The Coffee Haven**
+- **Tagline**: `BREW • BITE • RELAX`
+- **Logo Integration**: Placed across all touchpoints: Navigation bar, Hero crest, Modals, Digital receipts, and Footer.
+- **Color Palette**:
+  - **Deep Espresso & Dark Roast** (`#120905`, `#1a0f0a`, `#22130c`): Rich coffee dark tones providing a warm, luxurious cafe backdrop.
+  - **Warm Amber Gold & Caramel** (`#d4a373`, `#c89666`, `#e5ab74`): Signature metallic accents for buttons, borders, highlights, and icons.
+  - **Whipped Cream & Vanilla Foam** (`#fdfbf7`, `#f7efe2`): High-contrast text and warm light mode surfaces.
+  - **Blossom Glow** (`#e8b4a2`): Soft warm highlights inspired by the tranquil cherry blossom atmosphere.
+- **Light & Dark Theme**: Built-in instant theme switcher (`☀️ / 🌙`) with persistent state across all pages.
 
 ---
 
-## 3. Technology Stack
+## 🚀 Key Features & System Architecture
+
+### A. Home Page
+- **Navigation Bar**:
+  - Left: The Coffee Haven logo and brand name with `BREW • BITE • RELAX` badge.
+  - Right: Login button, Sign Up button, and Dark/Light mode toggle.
+  - *Dynamic State*: The `Home` link is strictly visible only when logged out, ensuring a clean dashboard experience when authenticated.
+- **Hero / Introduction Section**:
+  - Highlighting the central brand crest and artisanal story.
+  - Showcases values: sustainable sourcing, handcrafted patisserie, peaceful ambiance, and seamless branch ordering.
+  - Quick action buttons to explore menu, browse locations, or register.
+- **Our Locations Section**:
+  - Highlights all 3 operating branches with full details and photography:
+    1. **Hyderabad**: Plot 42, Road No. 36, Jubilee Hills (7:00 AM – 11:30 PM) — *Botanical Glasshouse*
+    2. **Vijayawada**: Trendset Tower, MG Road (7:30 AM – 11:00 PM) — *Acoustic Brick Lounge*
+    3. **Rajahmundry**: Riverview Boulevard, Godavari Pushkar Ghat (7:00 AM – 10:30 PM) — *Godavari Deck*
+  - Quick *"Order From Here"* triggers that set branch context dynamically.
+- **Customer Feedback Section**:
+  - Interactive submission form: Customer Name, Email, Feedback message, 1–5 Star Rating selector, and Submit button.
+  - Backed by persistent database storage (`/api/feedback`) and live review feed.
+
+### B. Authentication & Role-Based Access
+- **Dual Role Accounts**: **Customer Account** and **Admin Account**.
+- **Customer Sign Up**: Self-registration with full name, email, phone number, and password with input validation.
+- **Secure Authentication**: SHA-256 password hashing and role-based validation.
+- **Role Redirection**:
+  - Customers are redirected to the **Customer Dashboard & Menu**.
+  - Administrators are redirected to the **Admin Dashboard** (`/admin`).
+  - Strict route guarding: Customers cannot access administrative management consoles.
+
+### C. Customer Dashboard & Ordering
+- **Navigation Bar**:
+  - Shows user name, Account modal trigger, Cart count badge, Logout button, and Dark/Light toggle.
+  - Login, Sign Up, and Home buttons are hidden when authenticated.
+- **Location Selector (Hyderabad, Vijayawada, Rajahmundry)**:
+  - Branch switcher immediately adjusts the menu to reflect location-specific inventory.
+- **Menu Categories & Subcategories**:
+  - **A. Drinks**: Clicking reveals two subcategories:
+    - **Coffee**: Espresso, Latte, Cappuccino, Caramel Macchiato, Cold Coffee, Hazelnut Mocha.
+    - **Tea**: Royal Masala Chai, Classic Earl Grey, Organic Jasmine Green Tea, Hibiscus Berry Tea.
+  - **B. Milkshakes**: Belgian Chocolate Shake, Strawberry Velvet, Salted Caramel Pretzel, Oreo Dream Shake.
+  - **C. Sandwiches**: Pesto Veg Panini, Paneer Tikka, Chicken Club, Smoked Chicken & Jalapeno with **Vegetarian** and **Non-Vegetarian** filters.
+  - **D. Pastries**: Butter Croissant, Almond Croissant, Blueberry Muffin, Cinnamon Roll, Belgian Chocolate Eclair, Pecan Danish with **Nut-Free** filters.
+- **Product Cards**:
+  - Product thumbnail, name, description, price (₹), dietary badges (🟢 Veg / 🔴 Non-Veg), allergen indicators (Nut-Free / Contains Nuts), and stock status.
+  - **Dynamic (+) and (−) Quantity Controls**: Directly on the card with instant dynamic updates without page reloads.
+- **Guest Browsing Rules**:
+  - Guests can view the full menu across all branches.
+  - Attempting to add items to the cart or checkout as a guest prompts authentication (`🔒 Sign in to Order`).
+- **Shopping Cart & Checkout**:
+  - Floating cart bar and slide-in drawer showing items, subtotal, 5% GST tax, and final total.
+  - **Multi-Step Checkout Flow**:
+    1. Order Summary
+    2. Confirm selected branch location
+    3. Customer contact details & order type (Express Pickup, Dine-In, Takeaway)
+    4. Secure Payment Gateway (UPI / QR, Credit/Debit Card, Net Banking, Pay at Counter)
+    5. Mock encrypted gateway processing animation (PCI-DSS & 256-bit SSL badges)
+    6. Digital Order Confirmation receipt with unique Order ID and live preparation tracker.
+- **Customer Account Section**:
+  - **My Profile**: View and edit contact details.
+  - **My Cart**: Manage active quantities and proceed to checkout.
+  - **Past Orders**: History of previous orders with date, branch, items, quantities, total, payment status, and live preparation status (*Pending, Confirmed, Preparing, Ready, Completed, Cancelled*).
+
+### D. Admin Dashboard & Operations
+- **Navbar**: Admin badge, Logout, and Theme toggle.
+- **4.1 Menu Management**:
+  - Full catalog view across all categories.
+  - **Add New Menu Item**: Name, price, category, subcategory, dietary type, allergen flag, description, and image URL.
+  - **Edit Item**: Update any product attribute in real time.
+  - **Delete Item**: Remove products from the catalog.
+- **4.2 Location-Based Item Availability**:
+  - Branch selector (**Hyderabad**, **Vijayawada**, **Rajahmundry**).
+  - Interactive **Enable / Disable Toggle Switches** per menu item.
+  - *Example Configured & Tested*:
+    - **Cappuccino**: Enabled in Hyderabad & Vijayawada, Disabled in Rajahmundry.
+    - **Cold Coffee**: Enabled in Hyderabad & Rajahmundry, Disabled in Vijayawada.
+    - **Veg Sandwich**: Disabled in Hyderabad, Enabled in Vijayawada & Rajahmundry.
+    - Disabling an item at one branch immediately hides it from customer menus at that location without affecting other branches.
+- **4.3 Order Management**:
+  - Comprehensive view of all incoming customer orders across all locations.
+  - Multi-parameter filtering:
+    - **By Location**: All, Hyderabad, Vijayawada, Rajahmundry.
+    - **By Status**: Pending, Confirmed, Preparing, Ready for Pickup, Completed, Cancelled.
+    - **By Date**: Calendar date filter.
+    - **Search**: By Order ID, customer name, email, or phone.
+  - **Live Status Update**: Dropdown on each order to advance status (*Pending &rarr; Confirmed &rarr; Preparing &rarr; Ready for Pickup &rarr; Completed &rarr; Cancelled*).
+
+### E. Common Global Footer
+- Consistent across Home, Customer Dashboard, and Admin Dashboard.
+- Brand identity, About Us story, Quick navigation links, Branch locations, Contact numbers (+91), Social media links, and Copyright.
+
+---
+
+## 🔑 Default Credentials
+
+| Role | Email | Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@thecoffeehaven.com` | `admin` | Full Administrative Console |
+| **Administrator (Alt)** | `admin@coffeehaven.com` | `admin123` | Full Administrative Console |
+| **Customer** | `customer@thecoffeehaven.com` | `customer123` | Menu, Cart, Checkout & Orders |
+
+> **One-Click Demo Buttons**: The Login modal includes quick demo buttons to automatically populate customer or admin credentials.
+
+---
+
+## 🛠️ Technology Stack
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Backend Language** | Java 21 | Modern LTS Java backend runtime |
+| **Backend Language** | Java 17 | Enterprise LTS Java runtime |
 | **Framework** | Spring Boot 3.2.0 | Enterprise REST framework |
-| **Web Module** | Spring Web (MVC) | REST controllers and HTTP request dispatching |
-| **Persistence** | Spring Data JPA / Hibernate | Repository abstraction and ORM |
-| **Database** | SQLite | Relational file-based database (`coffeeshop.db`) |
-| **Connectivity** | SQLite JDBC Driver (3.45.1.0) | Java-to-SQLite connection pool |
-| **Dialect** | Hibernate Community Dialects | SQLite dialect for Hibernate 6 |
-| **Monitoring** | Spring Boot Actuator | Health and metrics monitoring (`/actuator/health`) |
-| **Validation** | Spring Boot Validation (Hibernate Validator) | Bean validation (`@NotBlank`, `@NotNull`, `@Email`) |
-| **API Documentation** | OpenAPI 3 / Swagger (`springdoc-openapi`) | Interactive API exploration (`/swagger-ui.html`) |
-| **Frontend Framework** | React 18+ | Declarative component UI |
-| **Frontend Tooling** | Vite | Fast HMR dev server and bundler |
-| **Frontend Styling** | Sass (SCSS) | Maintainable styling and design system |
-| **Testing** | JUnit 5, Mockito, Spring Test, Vitest | Unit, mock, and integration test coverage |
-| **Build Management** | Maven 3.9+ | Multi-module build lifecycle management |
+| **Persistence** | Spring Data JPA / Hibernate | Entity ORM and Repository abstraction |
+| **Database** | SQLite | Persistent ACID database (`coffeeshop.db`) |
+| **Database Driver** | SQLite JDBC (3.45.1.0) | Java-to-SQLite connection pool |
+| **API Docs** | OpenAPI 3 / Swagger (`springdoc-openapi`) | Interactive REST API documentation (`/swagger-ui.html`) |
+| **Frontend Framework** | React 18 | Declarative component UI |
+| **Build Tooling** | Vite 5 | Fast HMR dev server and production bundler |
+| **Styling** | Sass (SCSS) | Custom luxury coffee design system with dark/light theming |
+| **Testing** | JUnit 5, Mockito, Vitest | Unit, mock, and integration test coverage |
 
 ---
 
-## 4. Key Features & Implemented Modules
+## 🗄️ Database & Persistence Model
 
-### A. Customer-Facing Coffee & Pastry Selection
-- **Branch Selection**: Filter available products by branch: **Downtown**, **Airport**, or **Campus**.
-- **Category Filtering**: Instant switching between **All**, **Coffee**, and **Pastry**.
-- **Nut-Free Filter**: Toggle to isolate nut-free pastries for customers with dietary restrictions or allergies.
-- **Product Cards**: Display product badges (Coffee / Pastry, Nut-Free flag, Price, ID) with quick "Add to order".
-- **Cart & Checkout**: Real-time cart calculation, name entry, and immediate order dispatch to the backend.
-
-### B. Interactive Admin Console
-- **User Management**: Add new staff/admin users with email validation, list existing staff, and delete accounts.
-- **Product Management**: Real-time inline editing of product names, categories, pricing, and allergen indicators.
-- **Product Availability by Location**: Interactive grid showing product availability across all three branches (Downtown, Airport, Campus) with instant toggle checkboxes.
-- **Order Management**: Monitor customer orders, branch location, item breakdown, and update statuses (**PENDING** &rarr; **PREPARING** &rarr; **COMPLETED**).
-
-### C. Core Retrieval Features (Specific Intern Contributions)
-During Week 2 of the internship, two core backend retrieval features were designed and implemented:
-
-#### Feature 1: Retrieve Nut-Free Pastries (`GET /api/pastries/nut-free`)
-- **Objective**: Retrieve only pastries that satisfy `nutFree == true`.
-- **Expected Behavior**:
-  - Nut-free pastries available: Returns HTTP 200 with matching records (e.g. Butter Croissant, Blueberry Muffin, Cinnamon Roll).
-  - No nut-free pastries available: Returns HTTP 200 with an empty collection `[]`.
-
-#### Feature 2: Retrieve Pastry by ID (`GET /api/pastries/{id}`)
-- **Objective**: Retrieve a specific pastry by its unique numeric ID.
-- **Expected Behavior**:
-  - Valid pastry ID: Returns HTTP 200 with the matching pastry record.
-  - Non-existent ID or non-pastry product: Returns HTTP 404 with standard structured error JSON.
-
----
-
-## 5. Database & Persistence Model
-
-The SQLite database is initialized automatically with `schema.sql` and seeded with `data.sql`:
+The SQLite database is initialized via `schema.sql` and seeded with `data.sql`:
 
 ```sql
 CREATE TABLE products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
+    subcategory TEXT,
+    description TEXT,
     price REAL NOT NULL,
-    nut_free BOOLEAN NOT NULL
+    food_type TEXT DEFAULT 'VEG',
+    nut_free BOOLEAN NOT NULL DEFAULT 1,
+    image_url TEXT,
+    available BOOLEAN NOT NULL DEFAULT 1
 );
 
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
+    password TEXT,
+    phone TEXT,
     role TEXT NOT NULL
 );
 
 CREATE TABLE orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     customer TEXT NOT NULL,
+    customer_email TEXT,
+    customer_phone TEXT,
     location TEXT NOT NULL,
     total REAL NOT NULL,
     status TEXT NOT NULL,
+    payment_method TEXT,
+    payment_status TEXT,
     created_at TIMESTAMP NOT NULL
 );
 
@@ -185,85 +217,116 @@ CREATE TABLE product_availability (
     UNIQUE(product_id, location),
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
+
+CREATE TABLE feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    message TEXT NOT NULL,
+    rating INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
 ```
 
 ---
 
-## 6. API Endpoints Reference
+## 📡 API Endpoints Reference
 
+### Products & Menu
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/pastries/nut-free` | **Feature 1**: Retrieve all nut-free pastries |
-| `GET` | `/api/pastries/{id}` | **Feature 2**: Retrieve single pastry by ID (404 if not found) |
-| `GET` | `/api/products` | Retrieve all products (optional `?category=...`) |
-| `GET` | `/api/products/menu` | Location-specific menu (`?location=...&category=...&nutFreeOnly=true`) |
-| `GET` | `/api/products/{id}` | Retrieve product by ID |
-| `POST` | `/api/products` | Create a new product |
-| `PUT` | `/api/products/{id}` | Update an existing product |
-| `DELETE` | `/api/products/{id}` | Delete a product |
-| `GET` | `/api/users` | List all system users |
-| `POST` | `/api/users` | Create user account (`ADMIN` / `STAFF`) |
-| `DELETE` | `/api/users/{id}` | Delete user account |
-| `GET` | `/api/orders` | Retrieve list of all orders |
-| `POST` | `/api/orders` | Place a new customer order |
-| `PUT` | `/api/orders/{id}/status` | Update order status (`PENDING`, `PREPARING`, `COMPLETED`) |
-| `GET` | `/api/availability` | Retrieve location availability matrix |
-| `PUT` | `/api/availability/{productId}/{location}` | Toggle product availability at location |
-| `GET` | `/swagger-ui.html` | Interactive Swagger API documentation |
-| `GET` | `/actuator/health` | Application health check endpoint |
+| `GET` | `/api/products` | Retrieve all products (optional `category` filter) |
+| `GET` | `/api/products/menu` | Location-filtered menu (`location`, `category`, `nutFreeOnly`) |
+| `GET` | `/api/products/{id}` | Get product by numeric ID |
+| `POST` | `/api/products` | Create a new product (Admin) |
+| `PUT` | `/api/products/{id}` | Update an existing product (Admin) |
+| `DELETE` | `/api/products/{id}` | Remove a product (Admin) |
+
+### Branch Availability
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/availability` | Get full product-location availability matrix |
+| `PUT` | `/api/availability/{productId}/{location}` | Toggle availability boolean for a specific branch |
+
+### Authentication & Users
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | Register a new customer account |
+| `POST` | `/api/auth/login` | Authenticate customer or administrator |
+| `PUT` | `/api/auth/profile/{id}` | Update customer profile details |
+| `GET` | `/api/users` | List all registered users (Admin) |
+
+### Orders & Checkout
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/orders` | Fetch orders (`location`, `customerEmail`, `status`) |
+| `POST` | `/api/orders` | Place a customer order |
+| `PUT` | `/api/orders/{id}/status` | Update order status (`PENDING`, `CONFIRMED`, `PREPARING`, `READY`, `COMPLETED`, `CANCELLED`) |
+
+### Customer Feedback
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/feedback` | Retrieve customer reviews |
+| `POST` | `/api/feedback` | Submit feedback with 1–5 star rating |
 
 ---
 
-## 7. Testing & Quality Verification
+## 🧪 Testing & Quality Verification
 
-Unit and mock tests are implemented using **JUnit 5**, **Mockito**, and **Spring MockMvc**:
-
-- `PastryServiceTest`:
-  - `shouldReturnMatchingPastriesWhenAvailable`
-  - `shouldReturnEmptyListWhenNoNutFreePastries`
-  - `shouldReturnPastryWhenValidId`
-  - `shouldThrowExceptionWhenIdNotFound`
-  - `shouldThrowExceptionWhenProductIsNotPastry`
-- `PastryControllerTest`:
-  - `testGetNutFreePastries` (HTTP 200 with JSON array)
-  - `testGetNutFreePastriesEmpty` (HTTP 200 with empty array)
-  - `testGetPastryByIdSuccess` (HTTP 200 with product details)
-  - `testGetPastryByIdNotFound` (HTTP 404 with structured error response)
-- `ExtendedServicesTest`:
-  - Product updates, User management, Order calculations, Order status validation, Location availability matrix.
-
-Run tests:
+### 1. Backend Test Suite (JUnit 5 + Mockito)
+Run all backend tests:
 ```bash
-mvn test -f backend/pom.xml
+cd backend
+mvn test
 ```
+- **15 Tests Passing (0 Failures, 0 Errors)**:
+  - `CoffeeShopApplicationTests`: Spring Boot context initialization.
+  - `PastryControllerTest`: REST API endpoints and exception handlers.
+  - `PastryServiceTest`: Core retrieval and nut-free logic.
+  - `ExtendedServicesTest`: Order totals, status lifecycle checks, availability matrix.
 
----
-
-## 8. Getting Started & Running the Application
-
-### Option A: Running the Spring Boot Full-Stack Server (Single Port 8080)
-The backend serves both the REST API and the bundled frontend:
+### 2. Frontend Test Suite (Vitest + React Testing Library)
+Run all frontend tests:
 ```bash
-# Compile and run Spring Boot backend
-mvn spring-boot:run -f backend/pom.xml
-```
-- Open browser to **`http://localhost:8080/`** to view the application.
-- Swagger UI: **`http://localhost:8080/swagger-ui.html`**
-- Health Check: **`http://localhost:8080/actuator/health`**
-
-### Option B: Running React Frontend in Development Mode (Vite)
-```bash
-# In frontend directory
 cd frontend
-npm install
+npm test
+```
+- **3 Tests Passing**:
+  - Brand identity and tagline rendering.
+  - `Home` button rendering when logged out.
+  - `Home` button strictly **hidden** when logged in as Customer or Admin.
+
+---
+
+## 🚀 Getting Started & Running the Application
+
+### Prerequisites
+- **Java 17+**
+- **Maven 3.9+**
+- **Node.js 18+** & **npm**
+
+### Option 1: Run Full-Stack via Spring Boot (Recommended)
+The frontend build is packaged directly inside the Spring Boot JAR:
+```bash
+cd backend
+mvn spring-boot:run
+```
+Open **`http://localhost:8080/`** in your browser.
+
+- **Web Application**: `http://localhost:8080/`
+- **Swagger / OpenAPI**: `http://localhost:8080/swagger-ui.html`
+- **Health Check**: `http://localhost:8080/actuator/health`
+
+### Option 2: Run with Vite Hot-Module Replacement (Frontend Development)
+In Terminal 1 (Backend):
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+In Terminal 2 (Frontend):
+```bash
+cd frontend
 npm run dev
 ```
-- Frontend will run on **`http://localhost:5173/`** with hot-reload, proxying API requests to Spring Boot on port 8080.
-
----
-
-## 9. Four-Week Development Journey
-- **Week 1 — Project Understanding & Architecture**: Explored the multi-module Maven structure, Spring Boot 3, Java 21, and layered architecture principles (Controller &rarr; Service &rarr; Repository &rarr; SQLite).
-- **Week 2 — Backend Retrieval Features**: Implemented nut-free pastry retrieval and ID lookup, edge-case exception handling, and comprehensive unit tests.
-- **Week 3 — Frontend Development & Integration**: Built the coffee selection interface, administrative dashboards for users, inventory, location matrices, and order management.
-- **Week 4 — Collaboration, Peer Code Reviews & Demonstration**: Participated in peer code reviews, resolved integration and data mapping issues, and presented the end-to-end working system.
+Open **`http://localhost:5173/`** (API requests are automatically proxied to port 8080).
