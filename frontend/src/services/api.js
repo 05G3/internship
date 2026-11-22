@@ -1,4 +1,5 @@
-const BASE_URL = '';
+const RAW_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = RAW_URL.replace(/\/+$/, '');
 
 export const API = {
   async fetchProducts() {
